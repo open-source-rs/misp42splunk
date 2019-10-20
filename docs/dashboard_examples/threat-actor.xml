@@ -1,0 +1,124 @@
+<dashboard theme="dark">
+  <label>MISP OSINT: Threat Actor TTP (WIP)</label>
+  <row>
+    <panel>
+      <title>Recent Threat Actor TTP by HITRUST Threat Catalog</title>
+      <chart>
+        <search>
+          <query>| mispapireport misp_instance=RESOURCE1 mode=p includeEventTags=true last=30d
+| search misp_tag="misp-galaxy:hitrust*" AND misp_tag="Threat Actor" AND NOT misp_tag="misp-galaxy:osrs-exploit-db*" 
+| eval misp_tag=mvfilter(match(misp_tag,"misp-galaxy:hitrust*"))
+|replace
+"misp-galaxy:hitrust=\"LIN14_Elevated_Privileges\"" WITH LIN14-Elevated-Privileges,
+"misp-galaxy:hitrust=\"LIN21_Malicious_Code_Execution\"" WITH LIN21-Mal-Code-Execution,
+"misp-galaxy:hitrust=\"LIN25_Masquerade_or_Pretexting\"" WITH LIN25-Pretexting,
+"misp-galaxy:hitrust=\"LIN29_Network_Sniffing\"" WITH LIN29-Network-Sniffing,
+"misp-galaxy:hitrust=\"LIN30_Phishing\"" WITH LIN30-Phishing,
+"misp-galaxy:hitrust=\"LIN32_Ransomware\"" WITH LIN32-Ransomware,
+"misp-galaxy:hitrust=\"LIN33_Remote_Access_Trojan(RAT)\"" WITH LIN33-RAT,
+"misp-galaxy:hitrust=\"LIN37_Rogue_certificates\"" WITH LIN37-Rogue-Certs,
+"misp-galaxy:hitrust=\"LIN44_Spear_phishing\"" WITH LIN44-Spear-Phishing,
+"misp-galaxy:hitrust=\"LIN6_Brute_force\"" WITH LIN6-Brute-Force,
+"misp-galaxy:hitrust=\"LIN7_Code_Injections\"" WITH LIN7-Code-Injection,
+"misp-galaxy:hitrust=\"LIN8_Command_injection\"" WITH LIN8-Command-Injection
+in misp_tag
+| stats dc(misp_event_id) by misp_tag</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Recent Threat Actor TTP Distribution by MITRE Attack Pattern</title>
+      <chart>
+        <search>
+          <query>| mispapireport misp_instance=RESOURCE1 mode=p includeEventTags=true last=30d
+| search misp_tag="misp-galaxy:mitre-attack-pattern=*" AND misp_tag="Threat Actor" AND NOT misp_tag="misp-galaxy:osrs-exploit-db*" 
+| eval misp_tag=mvfilter(match(misp_tag,"misp-galaxy:mitre-attack-pattern=*"))
+| replace 
+"misp-galaxy:mitre-attack-pattern=\"App Delivered via Email Attachment - T1434\"" WITH T1434-Delivered-Via-Email-Attachment,
+"misp-galaxy:mitre-attack-pattern=\"BITS Jobs - T1197\"" WITH T1197-BITS-Jobs,
+"misp-galaxy:mitre-attack-pattern=\"Brute Force - T1110\"" WITH T1110-Brute-Force,
+"misp-galaxy:mitre-attack-pattern=\"Commonly Used Port - T1043\"" WITH T1043-Commonly-Used-Port,
+"misp-galaxy:mitre-attack-pattern=\"Conduct social engineering - T1268\"" WITH T1268-Social-Engineering,
+"misp-galaxy:mitre-attack-pattern=\"Connection Proxy - T1090\"" WITH T1090-Connection-Proxy,
+"misp-galaxy:mitre-attack-pattern=\"Credential Dumping - T1003\"" WITH T1003-Credential-Dumping,
+"misp-galaxy:mitre-attack-pattern=\"Custom Command and Control Protocol - T1094\"" WITH T1094-Custom-C2,
+"misp-galaxy:mitre-attack-pattern=\"Data Encoding - T1132\"" WITH T1132-Data-Encoding,
+"misp-galaxy:mitre-attack-pattern=\"Data Encrypted - T1022\"" WITH T1022-Data-Encrypted
+in misp_tag
+| stats dc(misp_event_id) by misp_tag
+| head 10</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>
