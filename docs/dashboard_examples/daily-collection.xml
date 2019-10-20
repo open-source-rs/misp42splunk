@@ -1,0 +1,48 @@
+<form theme="dark">
+  <label>MISP OSINT: Daily Collection (WIP)</label>
+  <fieldset submitButton="false">
+    <input type="text" token="text">
+      <label>Event ID</label>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>OSINT Collected</title>
+      <table>
+        <search>
+          <query>| mispapireport misp_instance=RESOURCE1 mode=p includeEventTags=true last=12h | dedup misp_event_id | table misp_event_id misp_event_info | sort - misp_event_id | rename misp_event_id as Event_ID, misp_event_info as Event_Info</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Event Overview</title>
+      <table>
+        <search>
+          <query>| mispapireport misp_instance=RESOURCE1 mode=p includeEventTags=true last=7d | search misp_category="External analysis" misp_event_id="$text$" |  dedup misp_event_id | table misp_text | rename misp_text as As_Follows</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>
