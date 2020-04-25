@@ -1,0 +1,392 @@
+<dashboard theme="dark">
+  <label>DATA BREACH SCORING</label>
+  <row>
+    <panel>
+      <title>severity rating distribution</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_tag="misp-galaxy:CMCF-BLOCK-OSRS=\"OSRS Artifact Type: Data Breach (US)\""
+| eval misp_tag=mvfilter(match(misp_tag,"misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: Severity*"))
+
+| rex mode=sed field=misp_tag "s/misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: // s/.$//"
+
+| stats dc(misp_event_id) AS events by misp_tag
+| sort - events
+| eventstats sum(events) AS total
+| eval percent=events/total
+| head 10
+| fieldformat percent=round(100*percent,2)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>malicious intent distribution yes no</title>
+      <table>
+        <search>
+          <query>| mispgetioc misp_instance=RESOURCE1 last=2d
+| search misp_tag="misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: Malicious Intent*\"" [| inputlookup us_data_breach_weekly.csv | fields misp_event_id]
+| stats dc(misp_event_id) by misp_text
+| table misp_text dc(misp_event_id)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>DPC min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-total-dpc-score"
+| stats min(misp_text) AS "DPC Score MIN" max(misp_text) AS "DPC Score Max" avg(misp_text) AS "DPC Score AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>simple data min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-simple-data"
+| stats min(misp_text) AS "Simple Data MIN" max(misp_text) AS "Simple Data Max" avg(misp_text) AS "Simple Data AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>behavioral data min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-behavioral-data"
+| stats min(misp_text) AS "Behavioral Data MIN" max(misp_text) AS "Behavioral Data Max" avg(misp_text) AS "Behavioral Data AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>financial data min</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-financial-data"
+| stats min(misp_text) AS "Financial Data MIN" max(misp_text) AS "Financial Data Max" avg(misp_text) AS "Financial Data AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>sensitive data min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-sensitive-data"
+| stats min(misp_text) AS "Sensitive Data MIN" max(misp_text) AS "Sensitive Data Max" avg(misp_text) AS "Sensitive Data AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>ei min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-total-modifier"
+| stats min(misp_text) AS "Ease of Identification MIN" max(misp_text) AS "Ease of Identification Max" avg(misp_text) AS "Ease of Identification AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>full name min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-full-name"
+| stats min(misp_text) AS "Full Name Modifier MIN" max(misp_text) AS "Full Name Modifier Max" avg(misp_text) AS "Full Name Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>ID/Passport/SSN min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-id-passport-ssn"
+| stats min(misp_text) AS "ID/Passport/SSN Modifier MIN" max(misp_text) AS "ID/Passport/SSN Modifier Max" avg(misp_text) AS "ID/Passport/SSN Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Phone #/Home Address min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-phone-home-address"
+| stats min(misp_text) AS "Phone #/Home Address Modifier MIN" max(misp_text) AS "Phone #/Home Address Modifier Max" avg(misp_text) AS "Phone #/Home Address Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>email addy min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-email-address"
+| stats min(misp_text) AS "Email Address Modifier MIN" max(misp_text) AS "Email Address Modifier Max" avg(misp_text) AS "Email Address Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>picture min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-picture"
+| stats min(misp_text) AS "Picture Modifier MIN" max(misp_text) AS "Picture Modifier Max" avg(misp_text) AS "Picture Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>coding/alias min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-coding-alias-initials"
+| stats min(misp_text) AS "Coding/Alias Modifier MIN" max(misp_text) AS "Coding/Alias Modifier Max" avg(misp_text) AS "Coding/Alias Modifier AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>causality of breach min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-total-modifier"
+| stats min(misp_text) AS "Causality of Breach (CB) MIN" max(misp_text) AS "Causality of Breach (CB) Max" avg(misp_text) AS "Causality of Breach (CB) AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>loss of confidentiality min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-confidentiality"
+| stats min(misp_text) AS "Loss of Confidentiality MIN" max(misp_text) AS "Loss of Confidentiality Max" avg(misp_text) AS "Loss of Confidentiality AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>loss of integrity min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-integrity"
+| stats min(misp_text) AS "Loss of Integrity MIN" max(misp_text) AS "Loss of Integrity Max" avg(misp_text) AS "Loss of Integrity AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>loss of availability min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-availability"
+| stats min(misp_text) AS "Availability MIN" max(misp_text) AS "Availability Max" avg(misp_text) AS "Availability AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Malicious Intent min max avg</title>
+      <table>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-malicious-intent"
+| stats min(misp_text) AS "Malicious Intent MIN" max(misp_text) AS "Malicious Intent Max" avg(misp_text) AS "Malicious Intent AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
