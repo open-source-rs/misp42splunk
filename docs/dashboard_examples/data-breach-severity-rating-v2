@@ -1,0 +1,514 @@
+<dashboard theme="dark">
+  <label>DATA BREACH SCORING</label>
+  <row>
+    <panel>
+      <title>Distribution of Severity Ranking</title>
+      <table>
+        <title>This table shows the distribution of the sampled data breach artifacts by ENISA Severity Rating Ranking estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_tag="misp-galaxy:CMCF-BLOCK-OSRS=\"OSRS Artifact Type: Data Breach (US)\""
+
+| eval misp_tag=mvfilter(match(misp_tag,"misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: Severity*"))
+
+| rex mode=sed field=misp_tag "s/misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: // s/.$//"
+
+| stats dc(misp_event_id) AS events by misp_tag
+| sort - events
+| eventstats sum(events) AS total
+| eval percent=events/total
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp, misp_tag AS "Severity Rating", events AS "Number in Sample", total AS "Total Sample Size"
+
+| fieldformat percent=round(100*percent,2)
+
+| head 10
+
+| outputlookup severity_rating_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>malicious intent distribution yes no</title>
+      <table>
+        <search>
+          <query>| mispgetioc misp_instance=RESOURCE1 last=2d
+| search misp_tag="misp-galaxy:CMCF-BLOCK-OSRS=\"ENISA DB SE Rating: Malicious Intent*\"" [| inputlookup us_data_breach_weekly.csv | fields misp_event_id]
+| stats dc(misp_event_id) by misp_text
+| table misp_text dc(misp_event_id)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>DPC Modifier Minimum, Maximum, and Average DPC Modifier Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Data Processing Context (DPC) modifier by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-total-dpc-score"
+| stats min(misp_text) AS "DPC Score MIN" max(misp_text) AS "DPC Score Max" avg(misp_text) AS "DPC Score AVG"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Simple Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Simple Data rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-simple-data"
+| stats min(misp_text) AS "Simple Data MIN" max(misp_text) AS "Simple Data Max" avg(misp_text) AS "Simple Data AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup append=t simple_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Behavioral Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Behavioral Data rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-behavioral-data"
+| stats min(misp_text) AS "Behavioral Data MIN" max(misp_text) AS "Behavioral Data Max" avg(misp_text) AS "Behavioral Data AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup append=t behavioral_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Financial Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Financial Data rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-financial-data"
+| stats min(misp_text) AS "Financial Data MIN" max(misp_text) AS "Financial Data Max" avg(misp_text) AS "Financial Data AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup append=t financial_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Sensitive Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Sensitive Data rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-dpc-sensitive-data"
+| stats min(misp_text) AS "Sensitive Data MIN" max(misp_text) AS "Sensitive Data Max" avg(misp_text) AS "Sensitive Data AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup append=t sensitive_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>EI Modifier Minimum, Maximum, and Average EI Modifier Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Ease of Identification (EI) modifier by ENISA Severity Rating estimates.  The EI modifier is calculated by summing the individual artifact rating scores Full Name, ID/Passport, Phone/Home Address, Email Address, Picture, and Coding/Alias.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-total-modifier"
+| stats min(misp_text) AS "Ease of Identification MIN" max(misp_text) AS "Ease of Identification Max" avg(misp_text) AS "Ease of Identification AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup ei_modifier_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Full Name Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Full Name rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-full-name"
+| stats min(misp_text) AS "Full Name Modifier MIN" max(misp_text) AS "Full Name Modifier Max" avg(misp_text) AS "Full Name Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup full_name_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>ID/Passport Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts ID/Passport rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-id-passport-ssn"
+| stats min(misp_text) AS "ID/Passport/SSN Modifier MIN" max(misp_text) AS "ID/Passport/SSN Modifier Max" avg(misp_text) AS "ID/Passport/SSN Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup passport_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Phone/Home Address Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Phone/Home Address rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-phone-home-address"
+| stats min(misp_text) AS "Phone #/Home Address Modifier MIN" max(misp_text) AS "Phone #/Home Address Modifier Max" avg(misp_text) AS "Phone #/Home Address Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup telephone_address_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Email Address Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Email Address rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-email-address"
+| stats min(misp_text) AS "Email Address Modifier MIN" max(misp_text) AS "Email Address Modifier Max" avg(misp_text) AS "Email Address Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup email_address_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Picture Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Picture rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-picture"
+| stats min(misp_text) AS "Picture Modifier MIN" max(misp_text) AS "Picture Modifier Max" avg(misp_text) AS "Picture Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup picture_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Coding/Alias Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Coding/Alias rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-ei-coding-alias-initials"
+| stats min(misp_text) AS "Coding/Alias Modifier MIN" max(misp_text) AS "Coding/Alias Modifier Max" avg(misp_text) AS "Coding/Alias Modifier AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup coding_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>CB Modifier Minimum, Maximum, and Average CB Modifier Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Causality of Breach (CB) modifier by ENISA Severity Rating estimates.  The CB modifier is calculated by summing the individual artifact rating scores Loss of Confidentiality, Loss of Integrity,Loss of Availability, and Malicious Intent.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-total-modifier"
+| stats min(misp_text) AS "Causality of Breach (CB) MIN" max(misp_text) AS "Causality of Breach (CB) Max" avg(misp_text) AS "Causality of Breach (CB) AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup cb_modifier_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Loss of Confidentiality Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Loss of Confidentiality rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-confidentiality"
+| stats min(misp_text) AS "Loss of Confidentiality MIN" max(misp_text) AS "Loss of Confidentiality Max" avg(misp_text) AS "Loss of Confidentiality AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup confidentiality_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Loss of Integrity Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Loss of Integrity rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-integrity"
+| stats min(misp_text) AS "Loss of Integrity MIN" max(misp_text) AS "Loss of Integrity Max" avg(misp_text) AS "Loss of Integrity AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup integrity_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Loss of Availability Data Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Loss of Availability rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-availability"
+| stats min(misp_text) AS "Availability MIN" max(misp_text) AS "Availability Max" avg(misp_text) AS "Availability AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup availability_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Malicious Intent Minimum, Maximum, and Average Rating Score</title>
+      <table>
+        <title>This table shows the minimum value, maximum value, and average value for the sampled data breach artifacts Malicious Intent rating by ENISA Severity Rating estimates.</title>
+        <search>
+          <query>| mispgetevent misp_instance=RESOURCE1 getioc=t last=7d
+| search misp_object_name="db-se-cb-malicious-intent"
+| stats min(misp_text) AS "Malicious Intent MIN" max(misp_text) AS "Malicious Intent Max" avg(misp_text) AS "Malicious Intent AVG"
+
+| eval timestamp=now()
+| convert timeformat="%m-%d-%Y" ctime(timestamp) AS Date
+| rename timestamp AS Timestamp
+
+| outputlookup intent_data_test.csv</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
